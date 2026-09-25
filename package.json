@@ -2,7 +2,9 @@
   "name": "billiard-crm-root",
   "version": "1.0.0",
   "description": "Billiard & Game Club Management CRM",
+  "type": "module",
   "scripts": {
+    "dev": "node dev.js",
     "server": "node server/server.js",
     "client": "npm --prefix client run dev",
     "build": "npm --prefix client run build"
