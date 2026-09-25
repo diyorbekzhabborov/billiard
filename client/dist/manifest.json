@@ -1,0 +1,16 @@
+{
+  "short_name": "Billiard CRM",
+  "name": "Billiard & Game Club CRM Pro",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><circle cx='12' cy='12' r='10'/><circle cx='12' cy='12' r='4' fill='white'/><text x='12' y='14' font-size='6' font-weight='bold' text-anchor='middle' fill='%23111827'>8</text></svg>",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#090e15",
+  "theme_color": "#090e15",
+  "display": "standalone",
+  "orientation": "portrait"
+}

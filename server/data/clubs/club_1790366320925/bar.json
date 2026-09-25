@@ -1,0 +1,62 @@
+[
+  {
+    "id": "bar_1",
+    "name": "Чайник черного чая с лимоном",
+    "category": "drinks",
+    "price": 150
+  },
+  {
+    "id": "bar_2",
+    "name": "Чайник зеленого чая с жасмином",
+    "category": "drinks",
+    "price": 150
+  },
+  {
+    "id": "bar_3",
+    "name": "Кока-Кола 0.5л",
+    "category": "drinks",
+    "price": 120
+  },
+  {
+    "id": "bar_4",
+    "name": "Вода минеральная / без газа 0.5л",
+    "category": "drinks",
+    "price": 70
+  },
+  {
+    "id": "bar_5",
+    "name": "Энергетик Red Bull 0.25л",
+    "category": "drinks",
+    "price": 220
+  },
+  {
+    "id": "bar_6",
+    "name": "Кофе Американо / Эспрессо",
+    "category": "drinks",
+    "price": 140
+  },
+  {
+    "id": "bar_7",
+    "name": "Фисташки соленые (порция)",
+    "category": "snacks",
+    "price": 180
+  },
+  {
+    "id": "bar_8",
+    "name": "Чипсы Lays",
+    "category": "snacks",
+    "price": 120
+  },
+  {
+    "id": "bar_9",
+    "name": "Сэндвич фирменный",
+    "category": "kitchen",
+    "price": 230
+  },
+  {
+    "id": "bar_10",
+    "name": "Кальян классический",
+    "category": "hookah",
+    "price": 800
+  }
+]

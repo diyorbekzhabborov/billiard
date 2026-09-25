@@ -1,0 +1,47 @@
+[
+  {
+    "id": "table_1",
+    "name": "Стол 1 — Русский бильярд (12 футов)",
+    "category": "russian",
+    "hourlyRate": 400,
+    "status": "available",
+    "currentSession": null,
+    "createdAt": "2026-09-25T19:54:05.633Z"
+  },
+  {
+    "id": "table_2",
+    "name": "Стол 2 — Русский бильярд (10 футов)",
+    "category": "russian",
+    "hourlyRate": 350,
+    "status": "available",
+    "currentSession": null,
+    "createdAt": "2026-09-25T19:54:05.633Z"
+  },
+  {
+    "id": "table_3",
+    "name": "Стол 3 — Американский пул",
+    "category": "pool",
+    "hourlyRate": 300,
+    "status": "available",
+    "currentSession": null,
+    "createdAt": "2026-09-25T19:54:05.633Z"
+  },
+  {
+    "id": "table_4",
+    "name": "VIP Зал — Снукер & Lounge",
+    "category": "vip",
+    "hourlyRate": 600,
+    "status": "available",
+    "currentSession": null,
+    "createdAt": "2026-09-25T19:54:05.633Z"
+  },
+  {
+    "id": "table_5",
+    "name": "PlayStation 5 — Зона 1",
+    "category": "playstation",
+    "hourlyRate": 250,
+    "status": "available",
+    "currentSession": null,
+    "createdAt": "2026-09-25T19:54:05.633Z"
+  }
+]

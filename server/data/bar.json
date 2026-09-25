@@ -1,0 +1,32 @@
+[
+  {
+    "id": "bar_7",
+    "name": "Фисташки соленые (порция)",
+    "category": "snacks",
+    "price": 180
+  },
+  {
+    "id": "bar_8",
+    "name": "Чипсы Lays",
+    "category": "snacks",
+    "price": 120
+  },
+  {
+    "id": "bar_9",
+    "name": "Сухарики к пиву / орехи",
+    "category": "snacks",
+    "price": 100
+  },
+  {
+    "id": "bar_10",
+    "name": "Сэндвич фирменный",
+    "category": "kitchen",
+    "price": 230
+  },
+  {
+    "id": "bar_11",
+    "name": "Кальян классический",
+    "category": "hookah",
+    "price": 800
+  }
+]

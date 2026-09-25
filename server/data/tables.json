@@ -1,0 +1,20 @@
+[
+  {
+    "id": "table_1",
+    "name": "Стол 1 — Русский бильярд (12 футов)",
+    "category": "russian",
+    "hourlyRate": 30,
+    "status": "available",
+    "currentSession": null,
+    "createdAt": "2026-09-25T19:43:25.587Z"
+  },
+  {
+    "id": "table_2",
+    "name": "Стол 2 — Русский бильярд (10 футов)",
+    "category": "russian",
+    "hourlyRate": 350,
+    "status": "available",
+    "currentSession": null,
+    "createdAt": "2026-09-25T19:43:25.588Z"
+  }
+]
