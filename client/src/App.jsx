@@ -14,6 +14,7 @@ import PinLoginModal from './components/PinLoginModal';
 import MobileBottomNav from './components/MobileBottomNav';
 import AdminPanel from './components/AdminPanel';
 import { sound } from './utils/audio';
+import { api } from './utils/api';
 import { 
   PlusCircle, 
   Layers, 
@@ -75,34 +76,21 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [lastPrintedSession, setLastPrintedSession] = useState(null);
 
-  // Authenticated fetch wrapper for the active club
-  const clubFetch = (url, options = {}) => {
-    if (!currentClub) return Promise.reject(new Error("No active club"));
-    const headers = {
-      ...(options.headers || {}),
-      'X-Club-Pin': currentClub.pin
-    };
-    return fetch(url, { ...options, headers });
-  };
-
-  // Initial Fetch for active club
+  // Fetch data for active club
   const fetchData = async () => {
     if (!currentClub) return;
     try {
-      const [tRes, bRes, sRes, repRes] = await Promise.all([
-        clubFetch('/api/tables'),
-        clubFetch('/api/bar'),
-        clubFetch('/api/settings'),
-        clubFetch('/api/reports/daily')
+      const [tData, bData, sData, repData] = await Promise.all([
+        api.getTables(currentClub.pin),
+        api.getBar(currentClub.pin),
+        api.getSettings(currentClub.pin),
+        api.getDailyReport(currentClub.pin)
       ]);
 
-      if (tRes.ok) setTables(await tRes.json());
-      if (bRes.ok) setBarItems(await bRes.json());
-      if (sRes.ok) setSettings(await sRes.json());
-      if (repRes.ok) {
-        const rep = await repRes.json();
-        setTodaySummary(rep.summary || { totalRevenue: 0 });
-      }
+      if (tData) setTables(tData);
+      if (bData) setBarItems(bData);
+      if (sData) setSettings(sData);
+      if (repData) setTodaySummary(repData.summary || { totalRevenue: 0 });
     } catch (e) {
       console.error("API error", e);
     }
@@ -139,18 +127,13 @@ export default function App() {
   // Handlers for Session Lifecycle
   const handleStartSession = async (payload) => {
     try {
-      const res = await clubFetch('/api/sessions/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (res.ok) {
+      const res = await api.startSession(currentClub.pin, payload);
+      if (res && res.success) {
         if (settings.autoSound) sound.playStart();
         setStartModalTable(null);
         fetchData();
       } else {
-        alert(data.error || "Ошибка запуска сессии");
+        alert(res?.error || "Ошибка запуска сессии");
       }
     } catch (e) {
       console.error(e);
@@ -159,12 +142,8 @@ export default function App() {
 
   const handlePauseSession = async (table) => {
     try {
-      const res = await clubFetch('/api/sessions/pause', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tableId: table.id })
-      });
-      if (res.ok) {
+      const res = await api.pauseSession(currentClub.pin, table.id);
+      if (res && res.success) {
         sound.playClick();
         fetchData();
       }
@@ -175,19 +154,14 @@ export default function App() {
 
   const handleStopSession = async (payload) => {
     try {
-      const res = await clubFetch('/api/sessions/stop', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (res.ok) {
+      const res = await api.stopSession(currentClub.pin, payload);
+      if (res && res.success) {
         if (settings.autoSound) sound.playStop();
-        setLastPrintedSession(data.session);
+        setLastPrintedSession(res.session);
         setStopModalTable(null);
         fetchData();
       } else {
-        alert(data.error || "Ошибка расчета сессии");
+        alert(res?.error || "Ошибка расчета сессии");
       }
     } catch (e) {
       console.error(e);
@@ -197,18 +171,13 @@ export default function App() {
   // Transfer session
   const handleTransferSession = async (fromTableId, toTableId) => {
     try {
-      const res = await clubFetch('/api/sessions/transfer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fromTableId, toTableId })
-      });
-      if (res.ok) {
+      const res = await api.transferSession(currentClub.pin, fromTableId, toTableId);
+      if (res && res.success) {
         sound.playClick();
         setTransferTable(null);
         fetchData();
       } else {
-        const data = await res.json();
-        alert(data.error || "Ошибка переноса стола");
+        alert(res?.error || "Ошибка переноса стола");
       }
     } catch (e) {
       console.error(e);
@@ -218,22 +187,12 @@ export default function App() {
   // Add / Edit Table
   const handleSaveTable = async (tableData) => {
     try {
-      const isEditing = Boolean(tableData.id);
-      const url = isEditing ? `/api/tables/${tableData.id}` : '/api/tables';
-      const method = isEditing ? 'PUT' : 'POST';
-
-      const res = await clubFetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(tableData)
-      });
-
-      if (res.ok) {
+      const res = await api.saveTable(currentClub.pin, tableData);
+      if (res && res.success) {
         setEditTableModal({ isOpen: false, table: null });
         fetchData();
       } else {
-        const data = await res.json();
-        alert(data.error || "Ошибка сохранения стола");
+        alert(res?.error || "Ошибка сохранения стола");
       }
     } catch (e) {
       console.error(e);
@@ -242,13 +201,12 @@ export default function App() {
 
   const handleDeleteTable = async (tableId) => {
     try {
-      const res = await clubFetch(`/api/tables/${tableId}`, { method: 'DELETE' });
-      if (res.ok) {
+      const res = await api.deleteTable(currentClub.pin, tableId);
+      if (res && res.success) {
         setEditTableModal({ isOpen: false, table: null });
         fetchData();
       } else {
-        const data = await res.json();
-        alert(data.error || "Ошибка удаления стола");
+        alert(res?.error || "Ошибка удаления стола");
       }
     } catch (e) {
       console.error(e);
@@ -258,18 +216,14 @@ export default function App() {
   // Bar items management
   const handleAddToTable = async (tableId, item) => {
     try {
-      const res = await clubFetch('/api/sessions/add-bar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tableId,
-          itemId: item.id,
-          name: item.name,
-          price: item.price,
-          qty: 1
-        })
+      const res = await api.addBarOrder(currentClub.pin, {
+        tableId,
+        itemId: item.id,
+        name: item.name,
+        price: item.price,
+        qty: 1
       });
-      if (res.ok) {
+      if (res && res.success) {
         sound.playClick();
         fetchData();
       }
@@ -280,12 +234,8 @@ export default function App() {
 
   const handleUpdateTableItem = async (tableId, itemIndex, qty) => {
     try {
-      const res = await clubFetch('/api/sessions/update-bar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tableId, itemIndex, qty })
-      });
-      if (res.ok) {
+      const res = await api.updateBarOrder(currentClub.pin, { tableId, itemIndex, qty });
+      if (res && res.success) {
         fetchData();
       }
     } catch (e) {
@@ -295,12 +245,8 @@ export default function App() {
 
   const handleCreateBarItem = async (itemData) => {
     try {
-      const res = await clubFetch('/api/bar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(itemData)
-      });
-      if (res.ok) fetchData();
+      await api.createBarItem(currentClub.pin, itemData);
+      fetchData();
     } catch (e) {
       console.error(e);
     }
@@ -308,8 +254,8 @@ export default function App() {
 
   const handleDeleteBarItem = async (itemId) => {
     try {
-      const res = await clubFetch(`/api/bar/${itemId}`, { method: 'DELETE' });
-      if (res.ok) fetchData();
+      await api.deleteBarItem(currentClub.pin, itemId);
+      fetchData();
     } catch (e) {
       console.error(e);
     }
@@ -318,15 +264,9 @@ export default function App() {
   // Settings
   const handleSaveSettings = async (newSettings) => {
     try {
-      const res = await clubFetch('/api/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newSettings)
-      });
-      if (res.ok) {
-        const updated = await res.json();
+      const updated = await api.updateSettings(currentClub.pin, newSettings);
+      if (updated) {
         setSettings(updated);
-        // Also update local club info if clubName or currency changed
         setCurrentClub(prev => ({
           ...prev,
           name: updated.clubName,
@@ -341,8 +281,8 @@ export default function App() {
 
   const handleResetDemo = async () => {
     try {
-      const res = await clubFetch('/api/system/reset-demo', { method: 'POST' });
-      if (res.ok) {
+      const res = await api.resetDemo(currentClub.pin);
+      if (res && res.success) {
         setIsSettingsOpen(false);
         fetchData();
         alert("Стандартные столы и бар успешно восстановлены!");

@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Copy
 } from 'lucide-react';
+import { api } from '../utils/api';
 
 export default function AdminPanel({ onNavigateHome }) {
   const [adminToken, setAdminToken] = useState(() => sessionStorage.getItem('billiard_admin_token'));
@@ -39,15 +40,8 @@ export default function AdminPanel({ onNavigateHome }) {
   const fetchClubs = async (token) => {
     setLoadingClubs(true);
     try {
-      const res = await fetch('/api/admin/clubs', {
-        headers: { 'X-Admin-Token': token || adminToken }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setClubs(data);
-      } else if (res.status === 401) {
-        handleLogout();
-      }
+      const data = await api.getAdminClubs(token || adminToken);
+      setClubs(data || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -67,19 +61,14 @@ export default function AdminPanel({ onNavigateHome }) {
     setLoginLoading(true);
 
     try {
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      const data = await res.json();
+      const data = await api.adminLogin(username, password);
 
-      if (res.ok && data.success) {
+      if (data && data.success) {
         sessionStorage.setItem('billiard_admin_token', data.token);
         setAdminToken(data.token);
         fetchClubs(data.token);
       } else {
-        setLoginError(data.error || 'Неверный логин или пароль');
+        setLoginError(data?.error || 'Неверный логин или пароль');
       }
     } catch (e) {
       setLoginError('Ошибка связи с сервером');
@@ -108,31 +97,24 @@ export default function AdminPanel({ onNavigateHome }) {
 
     try {
       const isEditing = Boolean(editingClub);
-      const url = isEditing ? `/api/admin/clubs/${editingClub.id}` : '/api/admin/clubs';
-      const method = isEditing ? 'PUT' : 'POST';
+      const payload = {
+        name: clubName.trim(),
+        pin: clubPin.trim(),
+        currency: clubCurrency
+      };
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Token': adminToken
-        },
-        body: JSON.stringify({
-          name: clubName.trim(),
-          pin: clubPin.trim(),
-          currency: clubCurrency
-        })
-      });
-      const data = await res.json();
+      const data = isEditing 
+        ? await api.updateAdminClub(adminToken, editingClub.id, payload)
+        : await api.createAdminClub(adminToken, payload);
 
-      if (res.ok && data.success) {
+      if (data && data.success) {
         setShowAddModal(false);
         setEditingClub(null);
         setClubName('');
         setClubPin('');
         fetchClubs();
       } else {
-        setFormError(data.error || 'Ошибка сохранения клуба');
+        setFormError(data?.error || 'Ошибка сохранения клуба');
       }
     } catch (e) {
       setFormError('Ошибка связи с сервером');
@@ -145,15 +127,11 @@ export default function AdminPanel({ onNavigateHome }) {
     }
 
     try {
-      const res = await fetch(`/api/admin/clubs/${id}`, {
-        method: 'DELETE',
-        headers: { 'X-Admin-Token': adminToken }
-      });
-      const data = await res.json();
-      if (res.ok) {
+      const res = await api.deleteAdminClub(adminToken, id);
+      if (res && res.success) {
         fetchClubs();
       } else {
-        alert(data.error || 'Ошибка удаления клуба');
+        alert(res?.error || 'Ошибка удаления клуба');
       }
     } catch (e) {
       console.error(e);

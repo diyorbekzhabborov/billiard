@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search, Calendar, Trash2, Printer, Filter } from 'lucide-react';
+import { api } from '../utils/api';
 
 export default function HistoryModal({
   isOpen,
@@ -17,14 +18,8 @@ export default function HistoryModal({
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      let url = '/api/sessions/history?';
-      if (search) url += `search=${encodeURIComponent(search)}&`;
-      if (filterDate) url += `date=${encodeURIComponent(filterDate)}&`;
-      const res = await fetch(url, {
-        headers: { 'X-Club-Pin': clubPin || '' }
-      });
-      const data = await res.json();
-      setSessions(data);
+      const data = await api.getHistory(clubPin, search, filterDate);
+      setSessions(data || []);
     } catch (e) {
       console.error("Error fetching history", e);
     } finally {
@@ -39,11 +34,8 @@ export default function HistoryModal({
   const handleDelete = async (id) => {
     if (!confirm("Вы действительно хотите аннулировать эту запись?")) return;
     try {
-      const res = await fetch(`/api/sessions/history/${id}`, {
-        method: 'DELETE',
-        headers: { 'X-Club-Pin': clubPin || '' }
-      });
-      if (res.ok) {
+      const res = await api.deleteHistory(clubPin, id);
+      if (res && res.success) {
         setSessions(prev => prev.filter(s => s.id !== id));
       }
     } catch (e) {

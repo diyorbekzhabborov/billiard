@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Delete, AlertCircle } from 'lucide-react';
+import { api } from '../utils/api';
 
 export default function PinLoginModal({ onLoginSuccess }) {
   const [pin, setPin] = useState('');
@@ -44,23 +45,18 @@ export default function PinLoginModal({ onLoginSuccess }) {
   const submitPin = async (inputPin) => {
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/pin-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: inputPin })
-      });
-      const data = await res.json();
+      const data = await api.pinLogin(inputPin);
 
-      if (res.ok && data.success) {
+      if (data && data.success) {
         onLoginSuccess(data.club);
       } else {
-        setError(data.error || 'Неверный PIN-код');
+        setError(data?.error || 'Неверный PIN-код');
         setShake(true);
         setTimeout(() => setShake(false), 500);
         setTimeout(() => setPin(''), 600);
       }
     } catch (e) {
-      setError('Ошибка соединения с сервером');
+      setError('Ошибка входа');
     } finally {
       setLoading(false);
     }

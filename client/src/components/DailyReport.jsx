@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Coffee
 } from 'lucide-react';
+import { api } from '../utils/api';
 
 export default function DailyReport({
   isOpen,
@@ -31,10 +32,7 @@ export default function DailyReport({
   const fetchReport = async (date) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/reports/daily?date=${date}`, {
-        headers: { 'X-Club-Pin': clubPin || '' }
-      });
-      const data = await res.json();
+      const data = await api.getDailyReport(clubPin, date);
       setReportData(data);
     } catch (e) {
       console.error("Error fetching daily report", e);
